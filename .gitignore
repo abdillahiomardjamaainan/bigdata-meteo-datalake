@@ -1,20 +1,51 @@
-# Python virtual environment
-.venv/
-
-# Python cache
+# Python
 __pycache__/
-*.pyc
+*.py[cod]
+*$py.class
+*.so
+.Python
+*.egg-info/
+dist/
+build/
+.venv/
+venv/
+ENV/
 
-# Generated data (Data Lake content)
+# Airflow
+logs/
+airflow.db
+airflow.cfg
+airflow-webserver.pid
+standalone_admin_password.txt
+webserver_config.py
+
+# DBT
+dbt_weather_project/target/
+dbt_weather_project/dbt_packages/
+dbt_weather_project/logs/
+
+# Data Lake (fichiers de données)
 datalake/raw/
 datalake/formatted/
 datalake/usage/
 
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Jupyter
+.ipynb_checkpoints/
+
 # Environment variables
 .env
+.env.local
 
-# VS Code
-.vscode/
-
-# Windows
-Thumbs.db
+# Docker
+docker-compose.override.yml

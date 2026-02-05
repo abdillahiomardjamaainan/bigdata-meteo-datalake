@@ -1,0 +1,99 @@
+version: 2
+
+models:
+  - name: fct_tourism_daily
+    description: "KPIs quotidiens par ville pour l'analyse touristique"
+    
+    columns:
+      - name: city_name
+        description: "Nom de la ville"
+        tests:
+          - not_null
+      
+      - name: observation_date
+        description: "Date de l'observation"
+        tests:
+          - not_null
+      
+      - name: tourism_comfort_score
+        description: "Score de confort touristique (0-100)"
+        tests:
+          - not_null
+          - dbt_utils.accepted_range:
+              arguments:
+                min_value: 0
+                max_value: 100
+      
+      - name: avg_temperature
+        description: "Température moyenne quotidienne (°C)"
+        tests:
+          - not_null
+      
+      - name: total_precipitation
+        description: "Précipitations totales quotidiennes (mm)"
+        tests:
+          - not_null
+          - dbt_utils.accepted_range:
+              arguments:
+                min_value: 0
+                max_value: 500
+      
+      - name: day_category
+        description: "Catégorie de la journée (Idéale, Agréable, Moyenne, Difficile)"
+        tests:
+          - not_null
+          - accepted_values:
+              values: ['Idéale', 'Agréable', 'Moyenne', 'Difficile']
+
+  - name: fct_tourism_city_summary
+    description: "Résumé par ville avec classement et recommandations"
+    
+    columns:
+      - name: city_name
+        description: "Nom de la ville"
+        tests:
+          - not_null
+          - unique
+      
+      - name: city_rank
+        description: "Classement de la ville (1 = meilleure)"
+        tests:
+          - not_null
+          - unique
+      
+      - name: avg_comfort_score
+        description: "Score moyen de confort sur la période"
+        tests:
+          - not_null
+          - dbt_utils.accepted_range:
+              arguments:
+                min_value: 0
+                max_value: 100
+      
+      - name: total_days
+        description: "Nombre de jours analysés"
+        tests:
+          - not_null
+          - accepted_values:
+              values: [7]
+      
+      - name: good_days_percentage
+        description: "% de jours idéaux ou agréables"
+        tests:
+          - not_null
+          - dbt_utils.accepted_range:
+              arguments:
+                min_value: 0
+                max_value: 100
+      
+      - name: overall_recommendation
+        description: "Recommandation globale de la destination"
+        tests:
+          - not_null
+          - accepted_values:
+              values: 
+                - 'Excellente destination'
+                - 'Très bonne destination'
+                - 'Bonne destination'
+                - 'Destination correcte'
+                - 'Destination peu recommandée'
