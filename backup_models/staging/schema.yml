@@ -1,0 +1,40 @@
+version: 2
+
+sources:
+  - name: raw
+    schema: raw
+    tables:
+      - name: airquality
+      - name: weather
+      - name: population
+
+models:
+  - name: stg_airquality
+    description: "Données de qualité de l'air nettoyées"
+    columns:
+      - name: city
+        description: "Nom de la ville"
+      - name: aqi
+        description: "Air Quality Index (1=Good, 5=Very Poor)"
+      - name: air_quality_category
+        description: "Catégorie lisible de qualité de l'air"
+
+  - name: stg_weather
+    description: "Données météo nettoyées"
+    columns:
+      - name: city
+        description: "Nom de la ville"
+      - name: temperature
+        description: "Température en Celsius"
+      - name: temperature_category
+        description: "Catégorie de température"
+
+  - name: stg_population
+    description: "Données de population nettoyées"
+    columns:
+      - name: city
+        description: "Nom de la ville"
+      - name: population
+        description: "Nombre d'habitants"
+      - name: city_size
+        description: "Taille de la ville (Small/Medium/Large/Mega)"
