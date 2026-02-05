@@ -37,12 +37,23 @@ population_data AS (
         city,
         country,
         country_code,
+        latitude,
+        longitude,
         population,
-        city_size
+        CASE
+            WHEN population > 5000000 THEN 'Mega'
+            WHEN population > 1000000 THEN 'Large'
+            ELSE 'Medium'
+        END AS city_size
     FROM {{ ref('stg_population') }}
 )
 
-SELECT p.city, p.country, p.country_code, p.population, p.city_size,
+SELECT
+    -- Identité de la ville
+    p.city, p.country, p.country_code, p.population, p.city_size,
+
+-- 🌍 Coordonnées géographiques (pour carte Kibana)
+p.latitude, p.longitude,
 
 -- Air Quality
 aq.aqi,
