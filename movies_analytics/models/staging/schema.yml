@@ -1,0 +1,42 @@
+version: 2
+
+sources:
+  - name: raw
+    description: "Données brutes extraites des APIs TMDB et OMDb"
+    database: datalake
+    schema: raw
+    
+    tables:
+      - name: raw_tmdb_popular
+        description: "Films populaires TMDB"
+        columns:
+          - name: tmdb_id
+            description: "ID unique TMDB"
+            tests:
+              - not_null
+          - name: payload
+            description: "Données JSON complètes"
+      
+      - name: raw_tmdb_details
+        description: "Détails complets films TMDB"
+        columns:
+          - name: tmdb_id
+            description: "ID unique TMDB"
+            tests:
+              - not_null
+              - unique
+          - name: imdb_id
+            description: "ID IMDb pour jointure OMDb"
+          - name: payload
+            description: "Données JSON complètes"
+      
+      - name: raw_omdb_ratings
+        description: "Notes et critiques OMDb (IMDb, Rotten Tomatoes, Metacritic)"
+        columns:
+          - name: imdb_id
+            description: "ID IMDb"
+            tests:
+              - not_null
+              - unique
+          - name: payload
+            description: "Données JSON complètes OMDb"

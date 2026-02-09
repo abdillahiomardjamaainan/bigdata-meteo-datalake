@@ -1,0 +1,151 @@
+version: 2
+
+models:
+  - name: movies_enriched_daily
+    description: |
+      Table enrichie quotidienne combinant données TMDB et OMDb.
+      Contient informations complètes films : métadonnées, notes, flags business.
+    
+    columns:
+      # Identifiants
+      - name: snapshot_date
+        description: "Date snapshot données"
+        tests:
+          - not_null
+      
+      - name: tmdb_id
+        description: "ID unique TMDB"
+        tests:
+          - not_null
+          - unique
+      
+      - name: imdb_id
+        description: "ID IMDb (peut être NULL si pas de correspondance)"
+      
+      # Film
+      - name: title
+        description: "Titre film"
+        tests:
+          - not_null
+      
+      - name: release_date
+        description: "Date sortie film"
+      
+      - name: release_year
+        description: "Année sortie (extrait de release_date)"
+      
+      # Métriques TMDB
+      - name: popularity
+        description: "Score popularité TMDB (algorithme propriétaire)"
+      
+      - name: tmdb_rating
+        description: "Note moyenne TMDB (0-10)"
+      
+      - name: tmdb_vote_count
+        description: "Nombre votes TMDB"
+      
+      # Métriques OMDb
+      - name: imdb_rating
+        description: "Note IMDb (0-10)"
+      
+      - name: imdb_votes
+        description: "Nombre votes IMDb"
+      
+      - name: metascore
+        description: "Note Metacritic (0-100)"
+      
+      # Score composite
+      - name: composite_score
+        description: "Score composite : 60% IMDb + 40% Metascore normalisé"
+        tests:
+          - dbt_utils.accepted_range:
+              config:
+                severity: warn
+              arguments:
+                min_value: 0
+                max_value: 10
+      
+      # Métadonnées
+      - name: runtime_minutes
+        description: "Durée film en minutes"
+      
+      - name: status
+        description: "Statut film (Released, Post Production, etc.)"
+      
+      - name: original_language
+        description: "Langue originale (code ISO)"
+      
+      - name: rated
+        description: "Classification âge (G, PG, PG-13, R, NC-17)"
+      
+      - name: director
+        description: "Réalisateur(s)"
+      
+      - name: actors
+        description: "Acteurs principaux"
+      
+      # Flags
+      - name: missing_omdb_data
+        description: "TRUE si aucune donnée OMDb trouvée"
+      
+      - name: is_overhyped
+        description: "TRUE si popularité ≥ 50 ET score < 6.0 (surcoté)"
+      
+      - name: is_hidden_gem
+        description: "TRUE si popularité < 30 ET score ≥ 7.5 (pépite méconnue)"
+      
+      # JSON
+      - name: genres_json
+        description: "Array JSON genres TMDB"
+      
+      - name: production_countries_json
+        description: "Array JSON pays production"
+      
+      - name: omdb_ratings_json
+        description: "Array JSON notes OMDb (IMDb, Rotten Tomatoes, Metacritic)"
+
+  # ✅ DEUXIÈME MODÈLE (même niveau que movies_enriched_daily)
+  - name: kpi_daily_summary
+    description: |
+      KPI quotidiens agrégés par snapshot_date.
+      Permet de suivre l'évolution de la qualité/couverture des données.
+    
+    columns:
+      - name: snapshot_date
+        description: "Date du snapshot"
+        tests:
+          - not_null
+          - unique
+      
+      - name: nb_movies
+        description: "Nombre total de films"
+        tests:
+          - not_null
+      
+      - name: nb_movies_with_omdb
+        description: "Nombre de films avec données OMDb"
+      
+      - name: omdb_coverage_ratio
+        description: "Taux de couverture OMDb (0.00 à 1.00)"
+        tests:
+          - dbt_utils.accepted_range:
+              config:
+                severity: warn
+              arguments:
+                min_value: 0
+                max_value: 1
+      
+      - name: avg_tmdb_rating
+        description: "Note TMDB moyenne"
+      
+      - name: avg_imdb_rating
+        description: "Note IMDb moyenne"
+      
+      - name: avg_popularity
+        description: "Score popularité moyen"
+      
+      - name: nb_overhyped
+        description: "Nombre de films overhyped (popularité > 50, score < 6.0)"
+      
+      - name: nb_hidden_gems
+        description: "Nombre de hidden gems (popularité < 30, score >= 7.5)"

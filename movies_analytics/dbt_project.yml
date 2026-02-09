@@ -1,0 +1,40 @@
+# Configuration projet DBT - Movies Analytics
+name: 'movies_analytics'
+version: '1.0.0'
+config-version: 2
+
+# Profil à utiliser (référence profiles.yml)
+profile: 'movies_analytics'
+
+# Dossiers du projet
+model-paths: ["models"]
+analysis-paths: ["analyses"]
+test-paths: ["tests"]
+seed-paths: ["seeds"]
+macro-paths: ["macros"]
+snapshot-paths: ["snapshots"]
+
+# Dossiers de sortie
+clean-targets:
+  - "target"
+  - "dbt_packages"
+
+# Configuration des modèles
+models:
+  movies_analytics:
+    
+    # Couche staging (nettoyage données brutes)
+    staging:
+      +materialized: table
+      +schema: staging
+      +tags: ['staging']
+    
+    # Couche marts (modèles finaux)
+    marts:
+      +materialized: table
+      +schema: marts
+      +tags: ['marts']
+
+# Variables globales
+vars:
+  current_date: '{{ run_started_at.strftime("%Y-%m-%d") }}'
