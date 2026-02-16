@@ -1,3 +1,7 @@
+"""
+Indexation Elasticsearch depuis fichiers Parquet
+"""
+
 import os
 import json
 from datetime import datetime, date
@@ -6,14 +10,12 @@ import numpy as np
 
 import pandas as pd
 import requests
-from dotenv import load_dotenv
 
-load_dotenv()
-
-ES_HOST = os.getenv("ES_HOST", "http://localhost:9200").rstrip("/")
+# Configuration depuis variables d'environnement Airflow
+ES_HOST = os.getenv("ES_HOST", "http://elasticsearch:9200").rstrip("/")
 SNAPSHOT_DATE = os.getenv("SNAPSHOT_DATE") or datetime.now().strftime("%Y-%m-%d")
 
-DATALAKE_PATH = Path(__file__).parent.parent.parent / "datalake"
+DATALAKE_PATH = Path(os.getenv("OUTPUT_DIR", "/opt/airflow/datalake"))
 MOVIES_PARQUET = DATALAKE_PATH / "usage" / "movies_enriched" / f"snapshot_date={SNAPSHOT_DATE}" / "data.parquet"
 KPIS_PARQUET = DATALAKE_PATH / "usage" / "kpi_daily" / f"snapshot_date={SNAPSHOT_DATE}" / "data.parquet"
 
@@ -32,7 +34,7 @@ def es_ok() -> None:
         print(f"✅ Elasticsearch OK: {version}")
     except Exception as e:
         print(f"❌ Elasticsearch inaccessible: {e}")
-        print(f"   Vérifiez: docker compose ps")
+        print(f"   Host: {ES_HOST}")
         raise
 
 
@@ -68,7 +70,6 @@ def convert_to_json_serializable(obj):
         if pd.isna(obj):
             return None
     except (ValueError, TypeError):
-        # pd.isna() échoue sur arrays/listes
         pass
     
     # Gérer numpy NaN
@@ -93,7 +94,6 @@ def convert_to_json_serializable(obj):
     if isinstance(obj, (list, np.ndarray)):
         return [convert_to_json_serializable(item) for item in obj]
     
-    # Type standard (str, int, float, bool, dict)
     return obj
 
 
@@ -137,7 +137,6 @@ def bulk_index(index_name: str, df: pd.DataFrame, id_cols: list[str]) -> None:
     resp = r.json()
 
     if resp.get("errors"):
-        # Afficher quelques erreurs
         errors = []
         for item in resp.get("items", []):
             action = item.get("index", {})
@@ -145,7 +144,7 @@ def bulk_index(index_name: str, df: pd.DataFrame, id_cols: list[str]) -> None:
                 errors.append(action.get("error"))
                 if len(errors) >= 5:
                     break
-        raise RuntimeError(f"❌ Bulk indexing errors (extraits): {errors}")
+        raise RuntimeError(f"❌ Bulk indexing errors: {errors}")
 
     print(f"✅ Bulk OK: {index_name} ({len(df)} docs)")
 
@@ -155,6 +154,7 @@ def main():
     
     print(f"\n🚀 INDEXATION ELASTICSEARCH | snapshot_date={SNAPSHOT_DATE}\n")
     print(f"🌐 ES_HOST: {ES_HOST}")
+    print(f"📂 Datalake: {DATALAKE_PATH}")
     print(f"📂 Movies: {MOVIES_PARQUET}")
     print(f"📂 KPIs: {KPIS_PARQUET}\n")
 
@@ -163,9 +163,17 @@ def main():
 
     # Vérifier fichiers
     if not MOVIES_PARQUET.exists():
-        raise FileNotFoundError(f"❌ Fichier introuvable: {MOVIES_PARQUET}")
+        print(f"⚠️  Fichier movies introuvable: {MOVIES_PARQUET}")
+        print(f"   Contenu datalake/usage:")
+        usage_dir = DATALAKE_PATH / "usage"
+        if usage_dir.exists():
+            for item in usage_dir.rglob("*.parquet"):
+                print(f"   - {item}")
+        raise FileNotFoundError(f"Fichier introuvable: {MOVIES_PARQUET}")
+    
     if not KPIS_PARQUET.exists():
-        raise FileNotFoundError(f"❌ Fichier introuvable: {KPIS_PARQUET}")
+        print(f"⚠️  Fichier KPIs introuvable: {KPIS_PARQUET}")
+        raise FileNotFoundError(f"Fichier introuvable: {KPIS_PARQUET}")
 
     # Mapping movies
     movies_mapping = {
@@ -246,10 +254,9 @@ def main():
     
     print(f"\n📊 KIBANA")
     print(f"   URL: http://localhost:5601")
-    print(f"   1. Aller dans 'Stack Management' > 'Data Views'")
+    print(f"   1. Stack Management > Data Views")
     print(f"   2. Créer Data View '{INDEX_MOVIES}' (timestamp: snapshot_date)")
     print(f"   3. Créer Data View '{INDEX_KPIS}' (timestamp: snapshot_date)")
-    print(f"   4. Aller dans 'Discover' pour explorer")
 
 
 if __name__ == "__main__":

@@ -1,0 +1,12 @@
+movies_analytics:
+  target: dev
+  outputs:
+    dev:
+      type: postgres
+      host: postgres
+      port: 5432
+      user: postgres
+      password: postgres
+      dbname: datalake
+      schema: analytics  # ← CHANGÉ: analytics au lieu de analytics_staging
+      threads: 4

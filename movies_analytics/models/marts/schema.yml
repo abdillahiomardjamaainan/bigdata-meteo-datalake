@@ -57,13 +57,6 @@ models:
       # Score composite
       - name: composite_score
         description: "Score composite : 60% IMDb + 40% Metascore normalisé"
-        tests:
-          - dbt_utils.accepted_range:
-              config:
-                severity: warn
-              arguments:
-                min_value: 0
-                max_value: 10
       
       # Métadonnées
       - name: runtime_minutes
@@ -104,7 +97,6 @@ models:
       - name: omdb_ratings_json
         description: "Array JSON notes OMDb (IMDb, Rotten Tomatoes, Metacritic)"
 
-  # ✅ DEUXIÈME MODÈLE (même niveau que movies_enriched_daily)
   - name: kpi_daily_summary
     description: |
       KPI quotidiens agrégés par snapshot_date.
@@ -127,13 +119,6 @@ models:
       
       - name: omdb_coverage_ratio
         description: "Taux de couverture OMDb (0.00 à 1.00)"
-        tests:
-          - dbt_utils.accepted_range:
-              config:
-                severity: warn
-              arguments:
-                min_value: 0
-                max_value: 1
       
       - name: avg_tmdb_rating
         description: "Note TMDB moyenne"

@@ -46,17 +46,30 @@ services:
       AIRFLOW__CORE__EXECUTOR: LocalExecutor
       AIRFLOW__DATABASE__SQL_ALCHEMY_CONN: postgresql+psycopg2://postgres:postgres@postgres:5432/datalake
       AIRFLOW__CORE__LOAD_EXAMPLES: "false"
+      TMDB_API_KEY: "5f0a7bf2f50c49c8a9963cae1e78a019"
+      OMDB_API_KEY: "3ec8b84a"
+      POSTGRES_HOST: "postgres"
+      POSTGRES_PORT: "5432"
+      POSTGRES_DB: "datalake"
+      POSTGRES_USER: "postgres"
+      POSTGRES_PASSWORD: "postgres"
+      ES_HOST: "http://elasticsearch:9200"
     volumes:
       - ./dags:/opt/airflow/dags
       - ./scripts:/opt/airflow/scripts
       - ./logs:/opt/airflow/logs
       - ./plugins:/opt/airflow/plugins
+      - ./datalake:/opt/airflow/datalake
+      - ./movies_analytics:/opt/airflow/movies_analytics
     depends_on:
       postgres:
         condition: service_healthy
     command: >
-      bash -c "airflow db migrate &&
-      airflow users create --username admin --password admin --firstname Admin --lastname User --role Admin --email admin@example.com || true"
+      bash -c "
+      pip install --no-cache-dir --quiet dbt-core==1.7.9 dbt-postgres==1.7.9 requests psycopg2-binary pandas pyarrow elasticsearch==8.11.0 &&
+      airflow db migrate &&
+      airflow users create --username admin --password admin --firstname Admin --lastname User --role Admin --email admin@example.com || true
+      "
 
   airflow-webserver:
     image: apache/airflow:2.8.1-python3.11
@@ -65,6 +78,14 @@ services:
       AIRFLOW__CORE__EXECUTOR: LocalExecutor
       AIRFLOW__DATABASE__SQL_ALCHEMY_CONN: postgresql+psycopg2://postgres:postgres@postgres:5432/datalake
       AIRFLOW__CORE__LOAD_EXAMPLES: "false"
+      TMDB_API_KEY: "5f0a7bf2f50c49c8a9963cae1e78a019"
+      OMDB_API_KEY: "3ec8b84a"
+      POSTGRES_HOST: "postgres"
+      POSTGRES_PORT: "5432"
+      POSTGRES_DB: "datalake"
+      POSTGRES_USER: "postgres"
+      POSTGRES_PASSWORD: "postgres"
+      ES_HOST: "http://elasticsearch:9200"
     ports:
       - "8081:8080"
     volumes:
@@ -72,10 +93,16 @@ services:
       - ./scripts:/opt/airflow/scripts
       - ./logs:/opt/airflow/logs
       - ./plugins:/opt/airflow/plugins
+      - ./datalake:/opt/airflow/datalake
+      - ./movies_analytics:/opt/airflow/movies_analytics
     depends_on:
       - airflow-init
     command: >
-      bash -c "airflow db check && airflow webserver"
+      bash -c "
+      pip install --no-cache-dir --quiet dbt-core==1.7.9 dbt-postgres==1.7.9 requests psycopg2-binary pandas pyarrow elasticsearch==8.11.0 &&
+      airflow db check && 
+      airflow webserver
+      "
 
   airflow-scheduler:
     image: apache/airflow:2.8.1-python3.11
@@ -84,15 +111,29 @@ services:
       AIRFLOW__CORE__EXECUTOR: LocalExecutor
       AIRFLOW__DATABASE__SQL_ALCHEMY_CONN: postgresql+psycopg2://postgres:postgres@postgres:5432/datalake
       AIRFLOW__CORE__LOAD_EXAMPLES: "false"
+      TMDB_API_KEY: "5f0a7bf2f50c49c8a9963cae1e78a019"
+      OMDB_API_KEY: "3ec8b84a"
+      POSTGRES_HOST: "postgres"
+      POSTGRES_PORT: "5432"
+      POSTGRES_DB: "datalake"
+      POSTGRES_USER: "postgres"
+      POSTGRES_PASSWORD: "postgres"
+      ES_HOST: "http://elasticsearch:9200"
     volumes:
       - ./dags:/opt/airflow/dags
       - ./scripts:/opt/airflow/scripts
       - ./logs:/opt/airflow/logs
       - ./plugins:/opt/airflow/plugins
+      - ./datalake:/opt/airflow/datalake
+      - ./movies_analytics:/opt/airflow/movies_analytics
     depends_on:
       - airflow-init
     command: >
-      bash -c "airflow db check && airflow scheduler"
+      bash -c "
+      pip install --no-cache-dir --quiet dbt-core==1.7.9 dbt-postgres==1.7.9 requests psycopg2-binary pandas pyarrow elasticsearch==8.11.0 &&
+      airflow db check && 
+      airflow scheduler
+      "
 
 volumes:
   pgdata:
