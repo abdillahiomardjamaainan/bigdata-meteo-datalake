@@ -1,4 +1,5 @@
-from datetime import datetime, timedelta
+from datetime import timedelta
+import pendulum
 from airflow import DAG
 from airflow.operators.bash import BashOperator
 
@@ -9,15 +10,21 @@ DEFAULT_ARGS = {
 }
 
 AIRFLOW_DIR = "/opt/airflow"
-SNAPSHOT_DATE = "{{ macros.ds_add(ds, -1) }}"   # ✅ J-1
+
+# ✅ Daily snapshot = date logique du run Airflow (PAS J-1)
+SNAPSHOT_DATE = "{{ macros.ds_add(ds, 1) }}"
+
+# ✅ Un identifiant unique par run (utile si tu relances)
+RUN_ID = "{{ ts_nodash }}"
+
+PARIS = pendulum.timezone("Europe/Paris")
 
 with DAG(
     dag_id="movies_analytics_pipeline",
-    default_args=DEFAULT_ARGS,
-    schedule_interval="0 8 * * *",
-    start_date=datetime(2026, 2, 17),
+    schedule="07 20 * * *",  # ✅ tous les jours à 20h07 (Europe/Paris)
+    start_date=pendulum.datetime(2026, 2, 17, tz=PARIS),
     catchup=False,
-    tags=["movies"],
+    default_args=DEFAULT_ARGS,
 ) as dag:
 
     fetch_tmdb = BashOperator(
@@ -25,6 +32,7 @@ with DAG(
         bash_command=f"""
             set -e
             export SNAPSHOT_DATE="{SNAPSHOT_DATE}"
+            export RUN_ID="{RUN_ID}"
             export OUTPUT_DIR="{AIRFLOW_DIR}/datalake/raw"
             python "{AIRFLOW_DIR}/scripts/ingest/fetch_tmdb.py"
         """,
@@ -35,6 +43,7 @@ with DAG(
         bash_command=f"""
             set -e
             export SNAPSHOT_DATE="{SNAPSHOT_DATE}"
+            export RUN_ID="{RUN_ID}"
             export OUTPUT_DIR="{AIRFLOW_DIR}/datalake/raw"
             python "{AIRFLOW_DIR}/scripts/ingest/fetch_omdb.py"
         """,
@@ -45,6 +54,7 @@ with DAG(
         bash_command=f"""
             set -e
             export SNAPSHOT_DATE="{SNAPSHOT_DATE}"
+            export RUN_ID="{RUN_ID}"
             export DATA_DIR="{AIRFLOW_DIR}/datalake/raw"
             export POSTGRES_HOST=postgres
             export POSTGRES_PORT=5432
@@ -69,6 +79,7 @@ with DAG(
         bash_command=f"""
             set -e
             export SNAPSHOT_DATE="{SNAPSHOT_DATE}"
+            export RUN_ID="{RUN_ID}"
             export OUTPUT_DIR="{AIRFLOW_DIR}/datalake"
             export POSTGRES_HOST=postgres
             export POSTGRES_PORT=5432
@@ -84,7 +95,9 @@ with DAG(
         bash_command=f"""
             set -e
             export SNAPSHOT_DATE="{SNAPSHOT_DATE}"
+            export RUN_ID="{RUN_ID}"
             export ES_HOST=http://elasticsearch:9200
+            export OUTPUT_DIR="{AIRFLOW_DIR}/datalake"
             python "{AIRFLOW_DIR}/scripts/index/index_elasticsearch.py"
         """,
     )

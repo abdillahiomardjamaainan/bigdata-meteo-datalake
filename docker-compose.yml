@@ -1,3 +1,5 @@
+version: "3.8"
+
 services:
   postgres:
     image: postgres:16
@@ -46,6 +48,12 @@ services:
       AIRFLOW__CORE__EXECUTOR: LocalExecutor
       AIRFLOW__DATABASE__SQL_ALCHEMY_CONN: postgresql+psycopg2://postgres:postgres@postgres:5432/datalake
       AIRFLOW__CORE__LOAD_EXAMPLES: "false"
+
+      # timezone settings -> Europe/Paris
+      AIRFLOW__CORE__DEFAULT_TIMEZONE: Europe/Paris
+      AIRFLOW__WEBSERVER__DEFAULT_UI_TIMEZONE: Europe/Paris
+      TZ: Europe/Paris
+
       TMDB_API_KEY: "5f0a7bf2f50c49c8a9963cae1e78a019"
       OMDB_API_KEY: "3ec8b84a"
       POSTGRES_HOST: "postgres"
@@ -78,6 +86,12 @@ services:
       AIRFLOW__CORE__EXECUTOR: LocalExecutor
       AIRFLOW__DATABASE__SQL_ALCHEMY_CONN: postgresql+psycopg2://postgres:postgres@postgres:5432/datalake
       AIRFLOW__CORE__LOAD_EXAMPLES: "false"
+
+      # timezone settings -> Europe/Paris
+      AIRFLOW__CORE__DEFAULT_TIMEZONE: Europe/Paris
+      AIRFLOW__WEBSERVER__DEFAULT_UI_TIMEZONE: Europe/Paris
+      TZ: Europe/Paris
+
       TMDB_API_KEY: "5f0a7bf2f50c49c8a9963cae1e78a019"
       OMDB_API_KEY: "3ec8b84a"
       POSTGRES_HOST: "postgres"
@@ -111,6 +125,12 @@ services:
       AIRFLOW__CORE__EXECUTOR: LocalExecutor
       AIRFLOW__DATABASE__SQL_ALCHEMY_CONN: postgresql+psycopg2://postgres:postgres@postgres:5432/datalake
       AIRFLOW__CORE__LOAD_EXAMPLES: "false"
+
+      # timezone settings -> Europe/Paris
+      AIRFLOW__CORE__DEFAULT_TIMEZONE: Europe/Paris
+      AIRFLOW__WEBSERVER__DEFAULT_UI_TIMEZONE: Europe/Paris
+      TZ: Europe/Paris
+
       TMDB_API_KEY: "5f0a7bf2f50c49c8a9963cae1e78a019"
       OMDB_API_KEY: "3ec8b84a"
       POSTGRES_HOST: "postgres"

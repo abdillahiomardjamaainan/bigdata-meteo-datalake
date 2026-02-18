@@ -10,7 +10,7 @@ from datetime import datetime
 import pyarrow as pa
 import pyarrow.parquet as pq
 
-# Configuration depuis variables d'environnement Airflow
+
 DB_CONFIG = {
     'host': os.getenv('POSTGRES_HOST', 'postgres'),
     'port': int(os.getenv('POSTGRES_PORT', '5432')),
@@ -19,11 +19,11 @@ DB_CONFIG = {
     'password': os.getenv('POSTGRES_PASSWORD', 'postgres')
 }
 
-# Chemin datalake dans le container
+
 DATALAKE_PATH = Path(os.getenv('OUTPUT_DIR', '/opt/airflow/datalake'))
 SNAPSHOT_DATE = os.getenv('SNAPSHOT_DATE', datetime.now().strftime('%Y-%m-%d'))
 
-# Tables à exporter
+
 EXPORTS = {
     'formatted': [
         ('analytics_staging.stg_tmdb_popular', 'tmdb_popular'),
@@ -39,7 +39,7 @@ EXPORTS = {
 def export_table_to_parquet(conn, schema_table: str, output_path: Path):
     """Exporte table PostgreSQL vers Parquet"""
     
-    print(f"📤 Export {schema_table} → {output_path}")
+    print(f" Export {schema_table} → {output_path}")
     
     try:
         # Lire données
@@ -73,15 +73,15 @@ def export_table_to_parquet(conn, schema_table: str, output_path: Path):
 def main():
     """Export complet PostgreSQL → Parquet"""
     
-    print(f"\n🚀 EXPORT DATALAKE - {SNAPSHOT_DATE}\n")
+    print(f"\n EXPORT DATALAKE - {SNAPSHOT_DATE}\n")
     
     # Afficher config
-    print(f"📁 Datalake path: {DATALAKE_PATH.absolute()}")
-    print(f"🐘 PostgreSQL: {DB_CONFIG['host']}:{DB_CONFIG['port']}/{DB_CONFIG['database']}\n")
+    print(f" Datalake path: {DATALAKE_PATH.absolute()}")
+    print(f" PostgreSQL: {DB_CONFIG['host']}:{DB_CONFIG['port']}/{DB_CONFIG['database']}\n")
     
     # Connexion PostgreSQL
     try:
-        print("🔌 Connexion PostgreSQL...")
+        print(" Connexion PostgreSQL...")
         conn = psycopg2.connect(**DB_CONFIG)
         print("✅ Connecté\n")
     except psycopg2.OperationalError as e:
@@ -93,7 +93,7 @@ def main():
     
     try:
         # Export FORMATTED (staging)
-        print("📁 FORMATTED (staging)")
+        print(" FORMATTED (staging)")
         print("=" * 50)
         
         for schema_table, name in EXPORTS['formatted']:
@@ -102,7 +102,7 @@ def main():
             stats['formatted'] += count
         
         # Export USAGE (marts)
-        print("\n📁 USAGE (marts)")
+        print("\n USAGE (marts)")
         print("=" * 50)
         
         for schema_table, name in EXPORTS['usage']:
@@ -112,9 +112,9 @@ def main():
         
         # Résumé
         print("\n" + "=" * 50)
-        print(f"✅ EXPORT TERMINÉ")
-        print(f"   📊 Formatted: {stats['formatted']} lignes")
-        print(f"   📊 Usage: {stats['usage']} lignes")
+        print(f" EXPORT TERMINÉ")
+        print(f"    Formatted: {stats['formatted']} lignes")
+        print(f"    Usage: {stats['usage']} lignes")
         print("=" * 50)
         
     finally:

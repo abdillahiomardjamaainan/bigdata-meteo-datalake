@@ -152,11 +152,11 @@ def bulk_index(index_name: str, df: pd.DataFrame, id_cols: list[str]) -> None:
 def main():
     """Indexation complète Elasticsearch"""
     
-    print(f"\n🚀 INDEXATION ELASTICSEARCH | snapshot_date={SNAPSHOT_DATE}\n")
-    print(f"🌐 ES_HOST: {ES_HOST}")
-    print(f"📂 Datalake: {DATALAKE_PATH}")
-    print(f"📂 Movies: {MOVIES_PARQUET}")
-    print(f"📂 KPIs: {KPIS_PARQUET}\n")
+    print(f"\n INDEXATION ELASTICSEARCH | snapshot_date={SNAPSHOT_DATE}\n")
+    print(f" ES_HOST: {ES_HOST}")
+    print(f" Datalake: {DATALAKE_PATH}")
+    print(f" Movies: {MOVIES_PARQUET}")
+    print(f" KPIs: {KPIS_PARQUET}\n")
 
     # Vérifier Elasticsearch
     es_ok()
@@ -225,13 +225,13 @@ def main():
     }
 
     # Créer indices
-    print("📊 Création indices")
+    print(" Création indices")
     print("=" * 50)
     create_index_if_missing(INDEX_MOVIES, movies_mapping)
     create_index_if_missing(INDEX_KPIS, kpis_mapping)
 
     # Lire Parquet
-    print("\n📖 Lecture Parquet")
+    print("\n Lecture Parquet")
     print("=" * 50)
     df_movies = pd.read_parquet(MOVIES_PARQUET)
     df_kpis = pd.read_parquet(KPIS_PARQUET)
@@ -240,7 +240,7 @@ def main():
     print(f"✅ KPIs: {len(df_kpis)} lignes, {len(df_kpis.columns)} colonnes")
 
     # Indexation bulk
-    print("\n📤 Indexation Elasticsearch")
+    print("\n Indexation Elasticsearch")
     print("=" * 50)
     bulk_index(INDEX_MOVIES, df_movies, id_cols=["snapshot_date", "tmdb_id"])
     bulk_index(INDEX_KPIS, df_kpis, id_cols=["snapshot_date"])
@@ -248,11 +248,11 @@ def main():
     # Résumé
     print("\n" + "=" * 50)
     print("🎉 INDEXATION TERMINÉE")
-    print(f"   📊 Movies: {len(df_movies)} docs indexés")
-    print(f"   📊 KPIs: {len(df_kpis)} docs indexés")
+    print(f"    Movies: {len(df_movies)} docs indexés")
+    print(f"    KPIs: {len(df_kpis)} docs indexés")
     print("=" * 50)
     
-    print(f"\n📊 KIBANA")
+    print(f"\n KIBANA")
     print(f"   URL: http://localhost:5601")
     print(f"   1. Stack Management > Data Views")
     print(f"   2. Créer Data View '{INDEX_MOVIES}' (timestamp: snapshot_date)")
